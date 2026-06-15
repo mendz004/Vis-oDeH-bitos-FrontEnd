@@ -1,4 +1,4 @@
-import { Outlet, Link } from "react-router";
+import { Outlet, Link } from "react-router-dom";
 import { Activity } from "lucide-react";
 
 export function PublicLayout() {

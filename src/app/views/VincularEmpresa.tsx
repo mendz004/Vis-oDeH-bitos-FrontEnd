@@ -1,18 +1,59 @@
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import { Building2, Plus, Link as LinkIcon, CheckCircle2 } from "lucide-react";
+import { vincularFuncionario } from "../../api/api";
+import { cadastrarEmpresa } from "../../api/api";
 
 export function VincularEmpresa() {
   const [activeTab, setActiveTab] = useState("vincular"); // "vincular" | "cadastrar"
   const [status, setStatus] = useState("");
 
-  const handleCadastrar = (e) => {
-    e.preventDefault();
-    setStatus("Empresa cadastrada com sucesso! Você agora é um administrador e pode acessar o Painel Admin.");
+  const [codigoEmpresa, setCodigoEmpresa] = useState("");
+  const [departamento, setDepartamento] = useState("");
+
+  const [nomeEmpresa, setNomeEmpresa] = useState("");
+  const [cnpj, setCnpj] = useState("");
+  const [quantidadeColaboradores, setQuantidadeColaboradores] = useState("");
+
+  const handleVincular = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault(); // Evita que a página recarregue
+    setStatus("Vinculando... aguarde.");
+
+    try {
+      const usuarioId = 1; // Substitua pelo ID do usuário logado.
+      await vincularFuncionario(codigoEmpresa, departamento, usuarioId);
+
+      setStatus("Sua conta foi vinculada à empresa com sucesso!");
+      setCodigoEmpresa("");
+      setDepartamento("");
+    } catch (erro) {
+      console.error("Erro ao vincular:", erro);
+      setStatus("Erro ao vincular conta. Verifique o código da empresa.");
+    }
   };
 
-  const handleVincular = (e) => {
-    e.preventDefault();
-    setStatus("Sua conta foi vinculada à empresa com sucesso!");
+  const handleCadastrar = async (e: React.FormEvent) => {
+    e.preventDefault(); // Evita que a página recarregue
+    
+    setStatus("Cadastrando empresa... aguarde.");
+
+    try {
+      // Novamente, o ID do usuário deve vir do seu contexto de login/autenticação
+      const usuarioId = 1; 
+
+      // Chama o seu mensageiro da API
+      const resposta = await cadastrarEmpresa(nomeEmpresa, cnpj, usuarioId);
+
+      // Mensagem de sucesso
+      setStatus("Empresa cadastrada com sucesso! Você agora é um administrador e pode acessar o Painel Admin.");
+      
+      // Limpa os campos do formulário
+      setNomeEmpresa("");
+      setCnpj("");
+
+    } catch (erro) {
+      console.error("Erro ao cadastrar empresa:", erro);
+      setStatus("Erro ao cadastrar empresa. Verifique os dados e tente novamente.");
+    }
   };
 
   return (

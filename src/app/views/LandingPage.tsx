@@ -1,4 +1,4 @@
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import { TrendingUp, Shield, Zap, Activity } from "lucide-react";
 
 export function LandingPage() {

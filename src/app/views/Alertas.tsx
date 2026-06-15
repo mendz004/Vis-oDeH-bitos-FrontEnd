@@ -1,5 +1,5 @@
 import { AlertTriangle, Info, AlertCircle, CheckCircle2 } from "lucide-react";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 
 export function Alertas() {
   const alertas = [

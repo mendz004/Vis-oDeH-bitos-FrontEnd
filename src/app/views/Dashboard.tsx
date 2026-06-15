@@ -1,5 +1,5 @@
 import { Activity, Heart, Moon, Zap, AlertTriangle, ChevronRight } from "lucide-react";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
 const data = [

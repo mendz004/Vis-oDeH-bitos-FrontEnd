@@ -1,10 +1,50 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router";
 import { Activity } from "lucide-react";
+import { cadastrarUsuario, loginUsuario } from "../../api/api";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 export function Login() {
   const location = useLocation();
+  const navigate = useNavigate();
   const isRegister = location.pathname === "/cadastro";
+
+  const [nome, setNome] = useState("");
+  const [email, setEmail] = useState("");
+  const [senha, setSenha] = useState("");
+  const [idade, setIdade] = useState("");
+  const [sexoBiologico, setSexoBiologico] = useState("Masculino");
+
+  const [erro, setErro] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErro(""); 
+
+    try {
+      if (isRegister) {
+        // LÓGICA DE CADASTRO
+        await cadastrarUsuario({
+          nome,
+          email,
+          senha,
+          idade: Number(idade),
+          sexoBiologico
+        });
+        
+        alert("Cadastro realizado com sucesso! Faça login para continuar.");
+        navigate("/login"); // Manda o usuário para a tela de login
+
+      } else {
+        // LÓGICA DE LOGIN
+        const resposta = await loginUsuario({ email, senha });
+        
+        navigate("/dashboard"); // Manda para o dashboard após sucesso
+      }
+    } catch (error: any) {
+      console.error("Erro na operação:", error);
+      setErro(error.message || "Ocorreu um erro de conexão.");
+    }
+  };
 
   return (
     <div className="flex-1 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
@@ -19,35 +59,75 @@ export function Login() {
           </p>
         </div>
 
-        <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+        {/* Mostra mensagem de erro caso exista */}
+        {erro && (
+          <div className="mb-4 p-3 bg-red-50 text-red-700 border border-red-200 rounded-md text-sm text-center">
+            {erro}
+          </div>
+        )}
+
+        {/* 3. CONECTANDO O FORMULÁRIO À FUNÇÃO */}
+        <form className="space-y-4" onSubmit={handleSubmit}>
           {isRegister && (
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Nome completo</label>
-              <input type="text" className="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="Kaue Oliveira da Silva" />
+              <input 
+                type="text" 
+                required
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
+                className="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+                placeholder="Kaue Oliveira da Silva" 
+              />
             </div>
           )}
           
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">E-mail</label>
-            <input type="email" className="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="kaue@exemplo.com" />
+            <input 
+              type="email" 
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+              placeholder="kaue@exemplo.com" 
+            />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">Senha</label>
-            <input type="password" className="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="••••••••" />
+            <input 
+              type="password" 
+              required
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
+              className="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+              placeholder="••••••••" 
+            />
           </div>
 
           {isRegister && (
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Idade</label>
-                <input type="number" className="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" placeholder="21" />
+                <input 
+                  type="number" 
+                  required
+                  value={idade}
+                  onChange={(e) => setIdade(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500" 
+                  placeholder="21" 
+                />
               </div>
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Sexo Biológico</label>
-                <select className="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
-                  <option>Masculino</option>
-                  <option>Feminino</option>
+                <select 
+                  value={sexoBiologico}
+                  onChange={(e) => setSexoBiologico(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-white"
+                >
+                  <option value="Masculino">Masculino</option>
+                  <option value="Feminino">Feminino</option>
                 </select>
               </div>
             </div>
@@ -65,9 +145,12 @@ export function Login() {
             </div>
           )}
 
-          <Link to="/dashboard" className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 mt-6">
+          <button 
+            type="submit" 
+            className="w-full flex justify-center py-2.5 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 mt-6"
+          >
             {isRegister ? "Finalizar Cadastro" : "Entrar"}
-          </Link>
+          </button>
         </form>
 
         <div className="mt-6 text-center text-sm text-slate-600">
@@ -80,4 +163,5 @@ export function Login() {
       </div>
     </div>
   );
+
 }
