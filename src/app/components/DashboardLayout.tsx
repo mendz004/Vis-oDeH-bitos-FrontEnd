@@ -1,13 +1,13 @@
-import { Outlet, Link, useLocation } from "react-router-dom";
-import { 
-  Activity, 
-  LayoutDashboard, 
-  PlusCircle, 
-  TrendingUp, 
-  GitCompare, 
-  Bell, 
-  Lightbulb, 
-  FileText, 
+import { Outlet, Link, useLocation, useNavigate } from "react-router-dom";
+import {
+  Activity,
+  LayoutDashboard,
+  PlusCircle,
+  TrendingUp,
+  GitCompare,
+  Bell,
+  Lightbulb,
+  FileText,
   Settings,
   Menu,
   X,
@@ -19,6 +19,15 @@ import { useState } from "react";
 export function DashboardLayout() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+
+  // 🔑 Puxa o nome completo salvo durante o Login (ou usa o padrão se não achar)
+  const nomeCompletoSalvo = localStorage.getItem("nome") || "Usuário Novo";
+
+  const handleLogout = () => {
+    localStorage.clear(); // Apaga o id e o nome salvos no navegador
+    navigate("/login");   // Redireciona para a tela de login
+  };
 
   const navItems = [
     { name: "Dashboard", path: "/dashboard", icon: LayoutDashboard },
@@ -47,11 +56,10 @@ export function DashboardLayout() {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  isActive 
-                    ? "bg-indigo-50 text-indigo-700" 
+                className={`flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${isActive
+                    ? "bg-indigo-50 text-indigo-700"
                     : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
-                }`}
+                  }`}
               >
                 <Icon className={`h-5 w-5 ${isActive ? "text-indigo-700" : "text-slate-400"}`} />
                 {item.name}
@@ -67,8 +75,16 @@ export function DashboardLayout() {
           <div className="mt-4 flex items-center gap-3 px-3 py-2">
             <UserCircle className="h-8 w-8 text-slate-400" />
             <div className="flex flex-col">
-              <span className="text-sm font-medium">Kauê Silva</span>
-              <span className="text-xs text-slate-500">Sair</span>
+              {/*O NOME DO PERFIL AGORA É DINÂMICO AQUI EMBAIXO: */}
+              <span className="text-sm font-medium">{nomeCompletoSalvo}</span>
+
+              {/*clique para deslogar */}
+              <span
+                onClick={handleLogout}
+                className="text-xs text-slate-500 cursor-pointer hover:text-red-500 transition-colors"
+              >
+                Sair
+              </span>
             </div>
           </div>
         </div>
@@ -97,11 +113,10 @@ export function DashboardLayout() {
                   key={item.path}
                   to={item.path}
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className={`flex items-center gap-3 px-3 py-3 rounded-md text-base font-medium ${
-                    isActive 
-                      ? "bg-indigo-50 text-indigo-700" 
+                  className={`flex items-center gap-3 px-3 py-3 rounded-md text-base font-medium ${isActive
+                      ? "bg-indigo-50 text-indigo-700"
                       : "text-slate-600 hover:bg-slate-50"
-                  }`}
+                    }`}
                 >
                   <Icon className={`h-5 w-5 ${isActive ? "text-indigo-700" : "text-slate-400"}`} />
                   {item.name}

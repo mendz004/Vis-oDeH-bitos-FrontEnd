@@ -32,13 +32,35 @@ export function Login() {
         });
         
         alert("Cadastro realizado com sucesso! Faça login para continuar.");
-        navigate("/login"); // Manda o usuário para a tela de login
+        navigate("/login"); 
 
       } else {
         // LÓGICA DE LOGIN
         const resposta = await loginUsuario({ email, senha });
         
-        navigate("/dashboard"); // Manda para o dashboard após sucesso
+        // 🔑 1. GUARDA O ID DO USUÁRIO NO NAVEGADOR
+        const idUsuario = resposta?.id || resposta?.usuarioId || resposta?.user?.id;
+        
+        if (idUsuario) {
+          localStorage.setItem("usuarioId", String(idUsuario));
+        } else {
+          console.warn("Aviso: O backend não retornou um ID de usuário válido na resposta.");
+        }
+        
+        // 🔑 2. GUARDA O NOME DO USUÁRIO NO NAVEGADOR (CORREÇÃO AQUI!)
+        // Tenta pegar o nome direto, ou dentro de um objeto 'user'/'usuario' que o Java costuma mandar
+        const nomeUsuario = resposta?.nome || resposta?.usuarioNome || resposta?.user?.nome || resposta?.usuario?.nome;
+        
+        if (nomeUsuario) {
+          localStorage.setItem("nome", String(nomeUsuario));
+        } else {
+          // Se o backend ainda não mandar o nome no login, salvamos o e-mail provisoriamente 
+          // ou um padrão para não quebrar a tela
+          localStorage.setItem("nome", email.split("@")[0]);
+          console.warn("Aviso: O backend não retornou o nome. Usando o prefixo do e-mail.");
+        }
+        
+        navigate("/dashboard"); 
       }
     } catch (error: any) {
       console.error("Erro na operação:", error);

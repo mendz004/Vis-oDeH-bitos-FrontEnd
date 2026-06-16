@@ -149,3 +149,38 @@ export async function compartilharRelatorio(usuarioId: number, periodo: string, 
     });
     return response.json();
 }
+
+// =====================================================
+//  HÁBITOS
+// =====================================================
+
+export async function salvarHabitos(usuarioId: number, dadosHabitos: any) {
+    // Nota: Confirme com quem fez o backend se a rota é exatamente "/habitos"
+    const response = await fetch(`${BASE_URL}/habitos?usuarioId=${usuarioId}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(dadosHabitos)
+    });
+
+    if (!response.ok) {
+        throw new Error("Erro ao salvar os hábitos do dia.");
+    }
+
+    return response.json();
+}
+
+// Buscar hábitos do dia atual para preencher a Dashboard
+export async function buscarHabitosHoje(usuarioId: number) {
+  const response = await fetch(`${BASE_URL}/habitos/hoje?usuarioId=${usuarioId}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+  if (!response.ok) {
+    throw new Error("Erro ao buscar hábitos do dia.");
+  }
+
+  return response.json(); // Devolve os dados que o Java achar
+}
