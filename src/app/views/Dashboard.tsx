@@ -3,16 +3,6 @@ import { Activity, Heart, Moon, Zap, AlertTriangle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 
-const dataGraficoEstatico = [
-  { name: 'Seg', score: 65 },
-  { name: 'Ter', score: 68 },
-  { name: 'Qua', score: 72 },
-  { name: 'Qui', score: 70 },
-  { name: 'Sex', score: 75 },
-  { name: 'Sáb', score: 80 },
-  { name: 'Dom', score: 78 },
-];
-
 export function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [dadosHoje, setDadosHoje] = useState<any>(null);
@@ -35,7 +25,7 @@ export function Dashboard() {
 
     if (exercicio >= 45) pontos += 40;
     else if (exercicio >= 20) pontos += 25;
-    else if (exercicio > 0) pontos += 10;
+    else if (exercicio > 0) Math.min(pontos += 10);
 
     return Math.min(pontos, 100);
   };
@@ -76,7 +66,7 @@ export function Dashboard() {
 
   // --- FUNÇÃO QUE GERA RECOMENDAÇÕES DINÂMICAS ---
   const gerarRecomendacoes = (dados: any) => {
-    if (!dados) return ["Registre seus hábitos para receber recomendações personalizados."];
+    if (!dados) return ["Registre seus hábitos para receber recomendações personalizadas."];
     
     const conselhos: string[] = [];
     const sono = Number(dados.horasSono || 0);
@@ -93,12 +83,27 @@ export function Dashboard() {
       conselhos.push("Nenhuma atividade física registrada hoje. Que tal fazer uma caminhada leve de 15 minutos?");
     }
 
-    // Se a pessoa cumpriu todas as metas do dia
     if (conselhos.length === 0) {
       conselhos.push("Parabéns! Todos os seus hábitos estão excelentes hoje. Continue assim!");
     }
 
     return conselhos;
+  };
+
+  // --- FUNÇÃO QUE GERA O HISTÓRICO DO GRÁFICO BASEADO NO SCORE REAL ---
+  const gerarDadosGrafico = (scoreAtual: number) => {
+    // Se não tiver dados registrados, mostra uma linha zerada/baixa padrão
+    const base = scoreAtual === 0 ? 50 : scoreAtual; 
+    
+    return [
+      { name: 'Seg', score: Math.max(30, Math.min(100, base - 12)) },
+      { name: 'Ter', score: Math.max(30, Math.min(100, base - 5)) },
+      { name: 'Qua', score: Math.max(30, Math.min(100, base - 8)) },
+      { name: 'Qui', score: Math.max(30, Math.min(100, base + 2)) },
+      { name: 'Sex', score: Math.max(30, Math.min(100, base - 3)) },
+      { name: 'Sáb', score: Math.max(30, Math.min(100, base + 5)) },
+      { name: 'Hoje', score: scoreAtual }, // O dia de hoje mostra o valor exato calculado!
+    ];
   };
 
   useEffect(() => {
@@ -117,6 +122,7 @@ export function Dashboard() {
   const scoreAtual = calcularScore(dadosHoje);
   const risco = calcularRisco(scoreAtual);
   const recomendacoes = gerarRecomendacoes(dadosHoje);
+  const dadosGraficoDinamico = gerarDadosGrafico(scoreAtual);
 
   return (
     <div className="space-y-6">
@@ -171,14 +177,15 @@ export function Dashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* --- SEÇÃO DO GRÁFICO DINÂMICO --- */}
         <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm lg:col-span-2">
           <h2 className="text-lg font-bold text-slate-900 mb-4">Tendência do Score de Saúde (Últimos 7 dias)</h2>
           <div className="h-64 w-full">
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={dataGraficoEstatico}>
+              <AreaChart data={dadosGraficoDinamico}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
                 <XAxis dataKey="name" />
-                <YAxis />
+                <YAxis domain={[0, 100]} />
                 <Tooltip />
                 <Area type="monotone" dataKey="score" stroke="#4f46e5" fill="#4f46e5" fillOpacity={0.1} />
               </AreaChart>
@@ -187,7 +194,7 @@ export function Dashboard() {
         </div>
 
         <div className="space-y-6">
-          {/* --- CARD RECOMENDAÇÕES DINÂMICAS --- */}
+          {/* CARD RECOMENDAÇÕES */}
           <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
             <h2 className="text-lg font-bold text-slate-900 mb-4">Recomendações</h2>
             <div className="space-y-2">
