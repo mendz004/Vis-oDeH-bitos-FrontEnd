@@ -44,15 +44,34 @@ export function Registrar() {
 
     // Estrutura o JSON exatamente como o backend precisa
     const dadosHabitos = {
-      dataRegistro: new Date().toISOString().split("T")[0], // YYYY-MM-DD (Data de hoje)
-      horasSono: Number(horasSono),
-      qualidadeSono,
-      gruposAlimentares,
-      aguaCopos: Number(aguaCopos),
-      exercicioTipo,
-      exercicioDuracao: Number(exercicioDuracao),
-      exercicioIntensidade,
-    };
+  usuarioId: usuarioId,
+
+  data: new Date().toISOString(),
+
+  horasSono: Math.round(Number(horasSono)),
+
+  qualidadeSono:
+    qualidadeSono === "Ruim" ? 1 :
+    qualidadeSono === "Razoável" ? 2 :
+    qualidadeSono === "Boa" ? 3 : 4,
+
+  alimentacao:
+    gruposAlimentares.length > 0
+      ? gruposAlimentares.join(", ")
+      : "Não informado",
+
+  exercicioTipo:
+    exercicioTipo === "Nenhum" ? 0 :
+    exercicioTipo === "Caminhada" ? 1 :
+    exercicioTipo === "Corrida" ? 2 :
+    exercicioTipo === "Musculação" ? 3 : 4,
+
+  exercicioIntensidade:
+    exercicioIntensidade === "Leve" ? 1 :
+    exercicioIntensidade === "Moderada" ? 2 : 3,
+
+  exercicioDuracao: Number(exercicioDuracao)
+};
 
     try {
       // Dispara para a rota do seu amigo passando o ID e o Payload

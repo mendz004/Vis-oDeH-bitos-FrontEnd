@@ -168,19 +168,24 @@ export async function compartilharRelatorio(usuarioId: number, periodo: string, 
 //  HÁBITOS
 // =====================================================
 
-export async function salvarHabitos(usuarioId: number, dadosHabitos: any) {
-    // Nota: Confirme com quem fez o backend se a rota é exatamente "/habitos"
-    const response = await fetch(`${BASE_URL}/habitos?usuarioId=${usuarioId}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(dadosHabitos)
-    });
+export async function salvarHabitos(
+  usuarioId: number,
+  dadosHabitos: any
+) {
+  const response = await fetch(`${BASE_URL}/habitos/save`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(dadosHabitos),
+  });
 
-    if (!response.ok) {
-        throw new Error("Erro ao salvar os hábitos do dia.");
-    }
+  if (!response.ok) {
+    const erro = await response.text();
+    throw new Error(erro);
+  }
 
-    return response.json();
+  return response.json();
 }
 
 // Buscar hábitos do dia atual para preencher a Dashboard
