@@ -21,12 +21,15 @@ export function DashboardLayout() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // 🔑 Puxa o nome completo salvo durante o Login (ou usa o padrão se não achar)
+  
   const nomeCompletoSalvo = localStorage.getItem("nome") || "Usuário Novo";
+  
+  //  Verifica se o usuário é um gestor
+  const isGestor = localStorage.getItem("isGestor") === "true";
 
   const handleLogout = () => {
-    localStorage.clear(); // Apaga o id e o nome salvos no navegador
-    navigate("/login");   // Redireciona para a tela de login
+    localStorage.clear(); 
+    navigate("/login");   
   };
 
   const navItems = [
@@ -68,17 +71,22 @@ export function DashboardLayout() {
           })}
         </nav>
         <div className="p-4 border-t border-slate-200">
-          <Link to="/admin" className="flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900">
-            <Settings className="h-5 w-5 text-slate-400" />
-            Painel Admin
-          </Link>
-          <div className="mt-4 flex items-center gap-3 px-3 py-2">
+          
+          {/*Renderização Condicional do Painel Admin */}
+          {isGestor && (
+            <Link to="/admin" className="flex items-center gap-3 px-3 py-2 mb-2 rounded-md text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-900">
+              <Settings className="h-5 w-5 text-slate-400" />
+              Painel Admin
+            </Link>
+          )}
+
+          <div className="mt-2 flex items-center gap-3 px-3 py-2">
             <UserCircle className="h-8 w-8 text-slate-400" />
             <div className="flex flex-col">
-              {/*O NOME DO PERFIL AGORA É DINÂMICO AQUI EMBAIXO: */}
+              {/* O NOME DO PERFIL DINÂMICO: */}
               <span className="text-sm font-medium">{nomeCompletoSalvo}</span>
 
-              {/*clique para deslogar */}
+              {/* clique para deslogar */}
               <span
                 onClick={handleLogout}
                 className="text-xs text-slate-500 cursor-pointer hover:text-red-500 transition-colors"
@@ -123,6 +131,19 @@ export function DashboardLayout() {
                 </Link>
               );
             })}
+            
+            {/*Painel Admin no Mobile*/}
+            {isGestor && (
+              <Link
+                to="/admin"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="flex items-center gap-3 px-3 py-3 rounded-md text-base font-medium text-slate-600 hover:bg-slate-50"
+              >
+                <Settings className="h-5 w-5 text-slate-400" />
+                Painel Admin
+              </Link>
+            )}
+            
           </nav>
         </div>
       )}

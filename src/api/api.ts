@@ -62,6 +62,13 @@ export async function cadastrarEmpresa(nome: string, cnpj: string, usuarioId: nu
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nome, cnpj })
     });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        console.error("Erro do Backend:", errorData);
+        throw new Error("Erro na validação do backend");
+    }
+
     return response.json();
 }
 
@@ -69,8 +76,15 @@ export async function vincularFuncionario(codigoEmpresa: string, departamento: s
     const response = await fetch(`${BASE_URL}/empresas/vincular?usuarioId=${usuarioId}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ codigoEmpresa, departamento })
+        body: JSON.stringify({ codigoEmpresa, departamento }) 
     });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        const mensagemErro = errorData?.erro || "Erro na validação do backend ao vincular";
+        throw new Error(mensagemErro);
+    }
+
     return response.json();
 }
 

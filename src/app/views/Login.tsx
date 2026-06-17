@@ -47,7 +47,7 @@ export function Login() {
           console.warn("Aviso: O backend não retornou um ID de usuário válido na resposta.");
         }
         
-        // 🔑 2. GUARDA O NOME DO USUÁRIO NO NAVEGADOR (CORREÇÃO AQUI!)
+        
         // Tenta pegar o nome direto, ou dentro de um objeto 'user'/'usuario' que o Java costuma mandar
         const nomeUsuario = resposta?.nome || resposta?.usuarioNome || resposta?.user?.nome || resposta?.usuario?.nome;
         

@@ -1,10 +1,9 @@
 import { FormEvent, useState } from "react";
 import { Building2, Plus, Link as LinkIcon, CheckCircle2 } from "lucide-react";
-import { vincularFuncionario } from "../../api/api";
-import { cadastrarEmpresa } from "../../api/api";
+import { vincularFuncionario, cadastrarEmpresa } from "../../api/api";
 
 export function VincularEmpresa() {
-  const [activeTab, setActiveTab] = useState("vincular"); // "vincular" | "cadastrar"
+  const [activeTab, setActiveTab] = useState("vincular");
   const [status, setStatus] = useState("");
 
   const [codigoEmpresa, setCodigoEmpresa] = useState("");
@@ -12,47 +11,64 @@ export function VincularEmpresa() {
 
   const [nomeEmpresa, setNomeEmpresa] = useState("");
   const [cnpj, setCnpj] = useState("");
-  const [quantidadeColaboradores, setQuantidadeColaboradores] = useState("");
+  const [quantidadeColaboradores, setQuantidadeColaboradores] = useState("10 - 50");
 
   const handleVincular = async (e: FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); // Evita que a página recarregue
+    e.preventDefault();
     setStatus("Vinculando... aguarde.");
 
     try {
-      const usuarioId = 1; // Substitua pelo ID do usuário logado.
+      // 💡 Pega diretamente o ID salvo no Local Storage
+      const idSalvo = localStorage.getItem("usuarioId"); 
+      
+      if (!idSalvo) {
+        setStatus("Erro: Usuário não encontrado. Faça login novamente.");
+        return;
+      }
+
+      // Converte o id de texto para número
+      const usuarioId = Number(idSalvo); 
+
       await vincularFuncionario(codigoEmpresa, departamento, usuarioId);
 
       setStatus("Sua conta foi vinculada à empresa com sucesso!");
       setCodigoEmpresa("");
       setDepartamento("");
-    } catch (erro) {
+    } catch (erro: any) {
       console.error("Erro ao vincular:", erro);
-      setStatus("Erro ao vincular conta. Verifique o código da empresa.");
+      setStatus(erro.message || "Erro ao vincular conta. Verifique os dados.");
     }
   };
 
   const handleCadastrar = async (e: React.FormEvent) => {
-    e.preventDefault(); // Evita que a página recarregue
-    
+    e.preventDefault();
     setStatus("Cadastrando empresa... aguarde.");
 
     try {
-      // Novamente, o ID do usuário deve vir do seu contexto de login/autenticação
-      const usuarioId = 1; 
+      // 💡 Pega diretamente o ID salvo no Local Storage aqui também
+      const idSalvo = localStorage.getItem("usuarioId"); 
+      
+      if (!idSalvo) {
+        setStatus("Erro: Usuário não encontrado. Faça login novamente.");
+        return;
+      }
 
-      // Chama o seu mensageiro da API
+      const usuarioId = Number(idSalvo); 
+
       const resposta = await cadastrarEmpresa(nomeEmpresa, cnpj, usuarioId);
 
-      // Mensagem de sucesso
-      setStatus("Empresa cadastrada com sucesso! Você agora é um administrador e pode acessar o Painel Admin.");
+      const codigoDaEmpresa = resposta.codigoAcesso || "ERRO-AO-CARREGAR-CODIGO";
+
+      setStatus(`Empresa cadastrada com sucesso! O código para seus funcionários se vincularem é: ${codigoDaEmpresa}`);
       
-      // Limpa os campos do formulário
+      localStorage.setItem("isGestor", "true");
+      window.dispatchEvent(new Event("storage"));
+
       setNomeEmpresa("");
       setCnpj("");
-
-    } catch (erro) {
+    } catch (erro: any) {
       console.error("Erro ao cadastrar empresa:", erro);
-      setStatus("Erro ao cadastrar empresa. Verifique os dados e tente novamente.");
+      setStatus(erro.message || "Erro ao cadastrar empresa. Verifique os dados e tente novamente.");
     }
   };
 
@@ -87,29 +103,31 @@ export function VincularEmpresa() {
 
       {activeTab === "vincular" && (
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="bg-indigo-100 p-3 rounded-lg text-indigo-600">
-              <LinkIcon className="h-6 w-6" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-slate-900">Vincular à Empresa</h2>
-              <p className="text-sm text-slate-500">Insira o código fornecido pelo RH da sua empresa.</p>
-            </div>
-          </div>
-
-          <form onSubmit={handleVincular} className="space-y-4 max-w-md">
+          {/* ... cabeçalho do vincular ... */}
+          <form onSubmit={handleVincular} className="space-y-4 max-w-md mt-6">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Código da Empresa</label>
-              <input type="text" required placeholder="Ex: EMP-12345" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none" />
+              <input 
+                type="text" 
+                required 
+                value={codigoEmpresa}
+                onChange={(e) => setCodigoEmpresa(e.target.value)}
+                placeholder="Ex: EMP-12345" 
+                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none" 
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Seu Departamento</label>
-              <select className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
-                <option>Selecione...</option>
-                <option>Marketing</option>
-                <option>Vendas</option>
-                <option>Serviços</option>
-                <option>RH</option>
+              <select 
+                value={departamento}
+                onChange={(e) => setDepartamento(e.target.value)}
+                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none bg-white"
+              >
+                <option value="">Selecione...</option>
+                <option value="Marketing">Marketing</option>
+                <option value="Vendas">Vendas</option>
+                <option value="Serviços">Serviços</option>
+                <option value="RH">RH</option>
               </select>
             </div>
             <button type="submit" className="bg-indigo-600 text-white px-6 py-2.5 rounded-md font-medium hover:bg-indigo-700 transition-colors w-full">
@@ -121,32 +139,41 @@ export function VincularEmpresa() {
 
       {activeTab === "cadastrar" && (
         <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="bg-indigo-100 p-3 rounded-lg text-indigo-600">
-              <Building2 className="h-6 w-6" />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-slate-900">Cadastrar Empresa</h2>
-              <p className="text-sm text-slate-500">Crie o perfil da sua empresa e convide colaboradores.</p>
-            </div>
-          </div>
-
-          <form onSubmit={handleCadastrar} className="space-y-4 max-w-md">
+          {/* ... cabeçalho do cadastrar ... */}
+          <form onSubmit={handleCadastrar} className="space-y-4 max-w-md mt-6">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Nome da Empresa</label>
-              <input type="text" required placeholder="Sua Empresa LTDA" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none" />
+              <input 
+                type="text" 
+                required 
+                value={nomeEmpresa}
+                onChange={(e) => setNomeEmpresa(e.target.value)}
+                placeholder="Sua Empresa LTDA" 
+                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none" 
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">CNPJ</label>
-              <input type="text" required placeholder="00.000.000/0000-00" className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none" />
+              <input 
+                type="text" 
+                required 
+                value={cnpj}
+                onChange={(e) => setCnpj(e.target.value)}
+                placeholder="00.000.000/0000-00" 
+                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none" 
+              />
             </div>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Número de Colaboradores Estimado</label>
-              <select className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none bg-white">
-                <option>10 - 50</option>
-                <option>51 - 200</option>
-                <option>201 - 500</option>
-                <option>Mais de 500</option>
+              <select 
+                value={quantidadeColaboradores}
+                onChange={(e) => setQuantidadeColaboradores(e.target.value)}
+                className="w-full px-3 py-2 border border-slate-300 rounded-md focus:ring-2 focus:ring-indigo-500 outline-none bg-white"
+              >
+                <option value="10 - 50">10 - 50</option>
+                <option value="51 - 200">51 - 200</option>
+                <option value="201 - 500">201 - 500</option>
+                <option value="Mais de 500">Mais de 500</option>
               </select>
             </div>
             <button type="submit" className="bg-indigo-600 text-white px-6 py-2.5 rounded-md font-medium hover:bg-indigo-700 transition-colors w-full flex justify-center items-center gap-2">
