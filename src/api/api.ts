@@ -142,27 +142,39 @@ export async function listarDepartamentos(usuarioId: number) {
  * Períodos: "7_DIAS" | "30_DIAS" | "3_MESES" | "1_ANO"
  * Seções:   "RESUMO" | "GRAFICOS" | "ALERTAS" | "PROJECOES"
  */
-export async function gerarRelatorio(usuarioId: number, periodo: string, secoes: string[]) {
-    const response = await fetch(`${BASE_URL}/relatorios/gerar?usuarioId=${usuarioId}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ periodo, secoes })
-    });
-    return response.blob();
-}
+// Adicione isto no seu arquivo api.ts
 
-/**
- * Gera o PDF e retorna um link compartilhável válido por 72h.
- * Resposta: { idRelatorio, linkCompartilhamento, dataExpiracao, mensagem }
- */
-export async function compartilharRelatorio(usuarioId: number, periodo: string, secoes: string[]) {
-    const response = await fetch(`${BASE_URL}/relatorios/compartilhar?usuarioId=${usuarioId}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ periodo, secoes })
-    });
-    return response.json();
-}
+export const baixarPdfBackend = async (usuarioId: number, periodo: string, secoes: string[]) => {
+  const response = await fetch(`http://localhost:8080/relatorios/gerarpdf/${usuarioId}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ periodo, secoes }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Erro ao gerar o PDF no servidor.");
+  }
+
+  return await response.blob();
+};
+
+export const gerarLinkBackend = async (usuarioId: number, periodo: string, secoes: string[]) => {
+  const response = await fetch(`http://localhost:8080/relatorios/compartilhar/${usuarioId}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ periodo, secoes }),
+  });
+
+  if (!response.ok) {
+    throw new Error("Erro ao gerar o link de compartilhamento.");
+  }
+
+  return await response.json();
+};
 
 // =====================================================
 //  HÁBITOS
