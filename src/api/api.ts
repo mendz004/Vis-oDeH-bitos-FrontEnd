@@ -1,5 +1,16 @@
 const BASE_URL = "http://localhost:8080";
 
+// =====================================================
+// TIPOS
+// =====================================================
+
+export type Comparacao = {
+    riscoAtual: number;
+    riscoIdeal: number;
+    diferenca: number;
+    mensagem: string;
+};
+
 // USUARIO
 
 export async function cadastrarUsuario(dadosUsuario: any) {
@@ -215,3 +226,186 @@ export async function buscarHabitosHoje(usuarioId: number) {
 
   return response.json(); // Devolve os dados que o Java achar
 }
+
+// =====================================================
+// ALERTAS
+// =====================================================
+
+export async function cadastrarAlerta(dadosAlerta: any) {
+    const response = await fetch(`${BASE_URL}/alertas/cadastrar`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(dadosAlerta),
+    });
+
+    if (!response.ok) {
+        throw new Error(await response.text());
+    }
+
+    return response.json();
+}
+
+export async function listarAlertas(page = 0, size = 10) {
+    const response = await fetch(
+        `${BASE_URL}/alertas/listar?page=${page}&size=${size}`
+    );
+
+    if (!response.ok) {
+        throw new Error("Erro ao listar alertas.");
+    }
+
+    return response.json();
+}
+
+export async function buscarAlerta(id: number) {
+    const response = await fetch(`${BASE_URL}/alertas/${id}`);
+
+    if (!response.ok) {
+        throw new Error("Alerta não encontrado.");
+    }
+
+    return response.json();
+}
+
+export async function editarAlerta(id: number, dadosAlerta: any) {
+    const response = await fetch(`${BASE_URL}/alertas/${id}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(dadosAlerta),
+    });
+
+    if (!response.ok) {
+        throw new Error(await response.text());
+    }
+
+    return response.json();
+}
+
+export async function excluirAlerta(id: number) {
+    const response = await fetch(`${BASE_URL}/alertas/${id}`, {
+        method: "DELETE",
+    });
+
+    if (!response.ok) {
+        throw new Error("Erro ao excluir alerta.");
+    }
+}
+
+// =====================================================
+// PROJEÇÕES DE SAÚDE
+// =====================================================
+
+export async function cadastrarProjecao(dadosProjecao: any) {
+    const response = await fetch(`${BASE_URL}/projecoes-saude/cadastrar`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(dadosProjecao),
+    });
+
+    if (!response.ok) {
+        throw new Error(await response.text());
+    }
+
+    return response.json();
+}
+
+export async function listarProjecoes(page = 0, size = 10) {
+    const response = await fetch(
+        `${BASE_URL}/projecoes-saude/listar?page=${page}&size=${size}`
+    );
+
+    if (!response.ok) {
+        throw new Error("Erro ao listar projeções.");
+    }
+
+    return response.json();
+}
+
+export async function buscarProjecao(id: number) {
+    const response = await fetch(`${BASE_URL}/projecoes-saude/${id}`);
+
+    if (!response.ok) {
+        throw new Error("Projeção não encontrada.");
+    }
+
+    return response.json();
+}
+
+export async function editarProjecao(id: number, dadosProjecao: any) {
+    const response = await fetch(`${BASE_URL}/projecoes-saude/${id}`, {
+        method: "PUT",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify(dadosProjecao),
+    });
+
+    if (!response.ok) {
+        throw new Error(await response.text());
+    }
+
+    return response.json();
+}
+
+export async function excluirProjecao(id: number) {
+    const response = await fetch(`${BASE_URL}/projecoes-saude/${id}`, {
+        method: "DELETE",
+    });
+
+    if (!response.ok) {
+        throw new Error("Erro ao excluir projeção.");
+    }
+}
+
+export async function buscarMinhaProjecao(usuarioId: number) {
+
+    const response = await fetch(
+        `${BASE_URL}/projecoes-saude/usuario/${usuarioId}`
+    );
+
+    if (!response.ok) {
+        throw new Error("Erro ao buscar projeções.");
+    }
+
+    return response.json();
+}
+
+export async function compararProjecao(
+    usuarioId: number
+): Promise<Comparacao> {
+    const response = await fetch(
+        `${BASE_URL}/projecoes-saude/usuario/${usuarioId}/comparar`
+    );
+
+    if (!response.ok) {
+        throw new Error("Erro ao comparar projeção.");
+    }
+
+    return response.json(); // ✅ CORRIGIDO AQUI
+}
+
+export async function buscarRecomendacoes(usuarioId: number) {
+
+    const response = await fetch(
+        `${BASE_URL}/projecoes-saude/usuario/${usuarioId}/recomendacoes`
+    );
+
+    if (!response.ok) {
+        throw new Error("Erro ao buscar recomendações.");
+    }
+
+    return response.json();
+}
+export type Recomendacao = {
+    categoria: string;
+    titulo: string;
+    descricao: string;
+    prioridade: "ALTA" | "MEDIA" | "BAIXA";
+    impacto: "ALTO" | "MEDIO" | "BAIXO";
+};
